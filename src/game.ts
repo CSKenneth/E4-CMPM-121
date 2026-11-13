@@ -314,22 +314,8 @@ export class GameScene extends Phaser.Scene implements Arena {
   }
 
   summon(_kind: string, x: number, y: number): void {
-    this.enemies.push(
-      new ShmupPrefabSprite(
-        this,
-        x,
-        y,
-        "drone",
-        2,
-        100,
-        13,
-        0.015,
-        true,
-        false,
-        x,
-        x < WIDTH / 2 ? 1 : -1,
-      ),
-    );
+    const side = x < WIDTH / 2 ? 1 : -1;
+    this.enemies.push(new ShmupPrefabSprite(this, "drone", x, y, side));
   }
 
   // one tick of gameplay
@@ -416,23 +402,8 @@ export class GameScene extends Phaser.Scene implements Arena {
     const sector = SECTORS[this.sector];
 
     for (const spawn of spawnsAt(sector.waves, t)) {
-      const enemy = new ShmupPrefabSprite(
-        this,
-        spawn.x,
-        spawn.y,
-        spawn.kind,
-        spawn.hp,
-        spawn.speed,
-        spawn.score,
-        spawn.dropChance,
-        spawn.special,
-        false,
-        spawn.x,
-        spawn.direction,
-      );
-
-      enemy.dropChance = spawn.dropChance;
-      this.enemies.push(enemy);
+      const { kind, x, y, direction } = spawn;
+      this.enemies.push(new ShmupPrefabSprite(this, kind, x, y, direction));
     }
   }
   private startBoss(): void {
