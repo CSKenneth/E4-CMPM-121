@@ -13,7 +13,7 @@ import type { Hud } from "../hud.ts";
 import type { LaunchOptions } from "../main.ts";
 import { AutoPilot, KeyboardPilot, type Pilot } from "../pilots.ts";
 import { Rng } from "../rng.ts";
-import { SECTORS, spawnsAt } from "../route.ts";
+import { type EnemyKind, SECTORS, spawnsAt } from "../route.ts";
 import { play } from "../sounds.ts";
 import { TINTS } from "../textures.ts";
 import { ArcadeScene } from "./arcade.ts";
@@ -30,13 +30,23 @@ export interface PlayData {
   attract: boolean;
 }
 
+/** The stats tracked during one run of the game. */
+export interface RunStats {
+  score: number;
+  lives: number;
+  kills: number;
+  hits: number;
+  continues: number;
+  bossDefeated: boolean;
+}
+
 /** One run of the game, flown by a person or by the self-play autopilot. */
 export class PlayScene extends ArcadeScene implements Arena {
   rng!: Rng;
   player!: Player;
   now = 0;
   private attract = false;
-  private run;
+  private run!: RunStats;
   private pilot!: Pilot;
   private enemies: Enemy[] = [];
   private shots: Bullet[] = [];
@@ -67,6 +77,7 @@ export class PlayScene extends ArcadeScene implements Arena {
       kills: 0,
       hits: 0,
       continues: 0,
+      bossDefeated: false,
     };
     this.enemies = [];
     this.shots = [];
@@ -141,7 +152,7 @@ export class PlayScene extends ArcadeScene implements Arena {
     );
   }
 
-  summon(_kind: string, x: number, y: number): void {
+  summon(_kind: EnemyKind, x: number, y: number): void {
     const side = x < WIDTH / 2 ? 1 : -1;
     this.enemies.push(new Enemy(this, "drone", x, y, side));
   }
@@ -290,7 +301,7 @@ export class PlayScene extends ArcadeScene implements Arena {
 
   private hurtPlayer(): void {
     // After the Warden falls, nothing can hurt the ship during the victory lap.
-    if (this.run.bossDefeted || this.gameOver || !this.player.vulnerable) {
+    if (this.run.bossDefeated || this.gameOver || !this.player.vulnerable) {
       return;
     }
     this.run.hits++;
@@ -323,7 +334,7 @@ export class PlayScene extends ArcadeScene implements Arena {
     this.victoryAt = this.now + VICTORY_TICKS;
     this.hud.setBoss(0);
     this.hud.announce("WARDEN DOWN", "The lanes are open");
-    console.log("victory lap: ship protected =", this.run.bossDefeted);
+    console.log("victory lap: ship protected =", this.run.bossDefeated);
     // The Warden's fall takes its bullets and escorts with it (no score).
     for (const bullet of this.bullets) {
       this.burst(bullet.x, bullet.y, 2, TINTS.spark);

@@ -1,5 +1,6 @@
 import { HEIGHT, WIDTH } from "../actors.ts";
 import type { Hud } from "../hud.ts";
+import type { RunStats } from "./play.ts";
 import { play } from "../sounds.ts";
 import { TINTS } from "../textures.ts";
 import { ArcadeScene } from "./arcade.ts";
@@ -16,7 +17,7 @@ const RETURN_AT = 18;
 
 /** What the play scene hands over when the Warden falls. */
 export interface CutsceneData {
-  run: { score: number; kills: number; hits: number; continues: number };
+  run: RunStats;
   /** True when the run just ended was self-play. */
   afterDemo: boolean;
 }

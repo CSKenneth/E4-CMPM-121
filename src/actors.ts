@@ -18,7 +18,7 @@ export interface Arena {
     speed: number,
     heavy?: boolean,
   ): void;
-  summon(kind: string, x: number, y: number): void;
+  summon(kind: EnemyKind, x: number, y: number): void;
 }
 
 /** A circle-collided image advanced once per fixed tick by its scene. */
@@ -138,7 +138,7 @@ export class Player extends Actor {
     return true;
   }
 
-  collect(kind: string): void {
+  collect(kind: PowerUpKind): void {
     if (kind === "spread") this.power = Math.min(MAX_POWER, this.power + 1);
     if (kind === "shield") this.shielded = true;
   }
@@ -154,14 +154,14 @@ function aim(from: { x: number; y: number }, arena: Arena): number {
 }
 
 /** Everything one kind of enemy shares, including how it moves and fires. */
-type EnemySpec = {
+interface EnemySpec {
   hp: number;
   score: number;
   radius: number;
   dropChance: number;
   move?: (enemy: Enemy, arena: Arena) => void;
   fire?: (enemy: Enemy, arena: Arena) => void;
-};
+}
 
 type EnemyType = EnemyKind | "boss";
 
